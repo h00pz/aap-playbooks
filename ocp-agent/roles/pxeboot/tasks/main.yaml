@@ -1,0 +1,50 @@
+---
+- name: figure out the mac name for h1
+  set_fact:
+    n1_new_mac: "{{ node1_mac | replace(':', '-') }}"
+
+- name: figure out the mac name for h2
+  set_fact:
+    n2_new_mac: "{{ node2_mac | replace(':', '-') }}"
+
+- name: figure out the mac name for h3
+  set_fact:
+    n3_new_mac: "{{ node3_mac | replace(':', '-') }}"
+
+- name: set pxeboot for n1 based on mac
+  template:
+    src: n1-tftp.j2
+    dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ n1_new_mac }}"
+
+- name: set pxeboot for n2 based on mac
+  template:
+    src: n2-tftp.j2
+    dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ n2_new_mac }}"
+
+- name: set pxeboot for n3 based on mac
+  template:
+    src: n3-tftp.j2
+    dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ n3_new_mac }}"
+
+#- name: set servers to pxeboot
+#  community.general.ipmi_boot:
+#    name: "{{ item }}"
+#    user: "{{ ipmi_user }}"
+#    password: "{{ ipmi_password }}"
+#    bootdev: pxe
+#    state: present
+#  with_items:
+#    - "{{ node1_ipmi }}"
+#    - "{{ node2_ipmi }}"
+#    - "{{ node3_ipmi }}"
+#
+#- name: Power up servers
+#  community.general.ipmi_power:
+#    name: "{{ item }}"
+#    user: "{{ ipmi_user }}"
+#    password: "{{ ipmi_password }}"
+#    state: on
+#  with_items:
+#    - "{{ node1_ipmi }}"
+#    - "{{ node2_ipmi }}"
+#    - "{{ node3_ipmi }}"

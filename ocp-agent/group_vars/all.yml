@@ -1,0 +1,49 @@
+---
+#enable debugging:
+#enable_debug: "yes"
+
+
+## Cluster Vars
+#
+cluster_name: testing
+domain_name:  example.com
+
+internal_dns_server: 192.168.1.100
+internal_dns_user: 
+internal_dns_pass: 
+
+## OCP Manifest Vars
+#
+manifest_dir: /opt/manifests
+web_dir:      /var/www/html/clusters
+ansible_user: cloud-user
+pxeboot_http: http://192.168.1.100/clusters/{{ cluster_name }}/
+ifname:       enp1s0
+disk:         /dev/sda
+mask_len:     24
+api_vip:      192.168.2.10
+ingress_vip:  192.168.2.11
+default_gw:   192.168.2.1
+dns_server:   192.168.1.100
+machine_net:  192.168.1.0/24
+cluster_net:  10.51.0.0/17
+service_net:  10.51.128.0/17
+cluster_net_len: 23
+
+## Node Specifics
+#  
+node1_name:   n1-testing.example.com
+node1_mac:    02:8f:40:01:02:01
+node1_ip:     192.168.2.20
+node1_ipmi:   192.168.2.30
+node2_name:   n2-testing.example.com
+node2_mac:    02:8f:40:01:02:02
+node2_ip:     192.168.2.21
+node2_ipmi:   192.168.2.31
+node3_name:   n3-testing.example.com
+node3_mac:    02:8f:40:01:02:03
+node3_ip:     192.168.2.22
+node3_ipmi:   192.168.2.23
+
+pull_secret: '<paste in your redhat pullsecret here>'
+ssh_key: "paste in your ssh public key here"

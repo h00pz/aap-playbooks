@@ -1,0 +1,38 @@
+---
+- name: Ensure pip is installed
+  yum:
+    name: python3-pip
+    state: present
+  become: yes
+
+- name: Ensure dnspython is installed
+  ansible.builtin.pip:
+    name: dnspython
+    state: present
+  become: yes
+
+- name: Add API_VIP record if it does not exist
+  community.general.nsupdate:
+    server: "{{ internal_dns_server }}"
+    zone: "{{ domain_name }}"
+    record: "api.{{ cluster_name }}"
+    value: "{{ api_vip }}"
+    type: "A"
+    ttl: 300
+    key_name: "{{ internal_dns_user }}"
+    key_secret: "{{ internal_dns_pass }}"
+    key_algorithm: "hmac-sha256"
+    state: present
+
+- name: Add Ingress_VIP record if it does not exist
+  community.general.nsupdate:
+    server: "{{ internal_dns_server }}"
+    zone: "{{ domain_name }}"
+    record: "*.apps.{{ cluster_name }}"
+    value: "{{ ingress_vip }}"
+    type: "A"
+    ttl: 300
+    key_name: "{{ internal_dns_user }}"
+    key_secret: "{{ internal_dns_pass }}"
+    key_algorithm: "hmac-sha256"
+    state: present

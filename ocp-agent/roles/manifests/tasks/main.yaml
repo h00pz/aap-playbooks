@@ -1,0 +1,71 @@
+---
+- name: clean out old directories if found
+  file:
+    path: "{{ manifest_dir }}/{{ cluster_name }}"
+    state: absent
+  ignore_errors: yes
+  
+- name: ensure manifest directory exists
+  file:
+    path: "{{ manifest_dir }}"
+    state: directory
+  become: true
+
+- name: ensure manifest cluster directory exists
+  file:
+    path: "{{ manifest_dir }}/{{ cluster_name }}"
+    state: directory
+  become: true
+
+- name: ensure openshift manifest cluster directory exists
+  file:
+    path: "{{ manifest_dir }}/{{ cluster_name }}/openshift"
+    state: directory
+  become: true
+
+- name: ensure web cluster directory exists
+  file:
+    path: "{{ web_dir }}/{{ cluster_name }}"
+    state: directory
+  become: true
+
+- name: Change directory local_path to current ansible user
+  ansible.builtin.file:
+    path: "{{ item }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0755'
+    recurse: yes
+  become: true
+  with_items:
+    - "{{ manifest_dir }}"
+    - "{{ web_dir }}"
+
+- name: Create cluster manifest directories
+  file:
+    path: "{{ manifest_dir }}/{{ cluster_name }}"
+    state: directory
+
+- name: create agent-config.yaml from template
+  template:
+    src: agent-config.j2
+    dest: "{{ manifest_dir }}/{{ cluster_name }}/agent-config.yaml"
+
+- name: create the install-config.yaml from template
+  template:
+    src: install-config.j2
+    dest: "{{ manifest_dir }}/{{ cluster_name }}/install-config.yaml"
+
+- name: create the 98-var-parts.yaml from template
+  template:
+    src: 98-var-parts.j2
+    dest: "{{ manifest_dir }}/{{ cluster_name }}/openshift/98-var-parts.yaml"
+
+- name: create the manifests
+  shell: "openshift-install agent create cluster-manifests --dir {{ manifest_dir }}/{{ cluster_name }}/"
+
+- name: create the pxeboot artifacts
+  shell: "openshift-install agent create pxe-files --dir {{ manifest_dir }}/{{ cluster_name }}/"
+
+- name: copy pxeboot artifacts to webserver
+  shell: "cp {{ manifest_dir }}/{{ cluster_name }}/boot-artifacts/* {{ web_dir }}/{{ cluster_name }}/"

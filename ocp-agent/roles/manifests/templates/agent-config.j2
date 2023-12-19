@@ -1,0 +1,87 @@
+apiVersion: v1beta1
+kind: AgentConfig
+metadata:
+  name: agent
+bootArtifactsBaseURL: {{ pxeboot_http }}
+hosts: 
+  - hostname: {{ node1_name }}  
+    interfaces:
+      - name: {{ ifname }}
+        macAddress: {{ node1_mac }}
+    rootDeviceHints: 
+      deviceName: {{ disk }}
+    networkConfig: 
+      interfaces:
+        - name: {{ ifname }}
+          type: ethernet
+          state: up
+          mac-address: {{ node1_mac }}
+          ipv4:
+            enabled: true
+            address:
+              - ip: {{ node1_ip }}
+                prefix-length: {{ mask_len }}
+            dhcp: false
+      dns-resolver:
+        config:
+          server: 
+            - {{ dns_server }}
+      routes:
+        config:
+          - destination: 0.0.0.0/0
+            next-hop-address: {{ default_gw }}
+            next-hop-interface: {{ ifname }}
+  - hostname: {{ node2_name }}
+    interfaces:
+      - name: {{ ifname }}
+        macAddress: {{ node2_mac }}
+    rootDeviceHints:
+      deviceName: {{ disk }}
+    networkConfig:
+      interfaces:
+        - name: {{ ifname }}
+          type: ethernet
+          state: up
+          mac-address: {{ node2_mac }}
+          ipv4:
+            enabled: true
+            address:
+              - ip: {{ node2_ip }}
+                prefix-length: {{ mask_len }}
+            dhcp: false
+      dns-resolver:
+        config:
+          server:
+            - {{ dns_server }}
+      routes:
+        config:
+          - destination: 0.0.0.0/0
+            next-hop-address: {{ default_gw }}
+            next-hop-interface: {{ ifname }}
+  - hostname: {{ node3_name }}
+    interfaces:
+      - name: {{ ifname }}
+        macAddress: {{ node3_mac }}
+    rootDeviceHints:
+      deviceName: {{ disk }}
+    networkConfig:
+      interfaces:
+        - name: {{ ifname }}
+          type: ethernet
+          state: up
+          mac-address: {{ node3_mac }}
+          ipv4:
+            enabled: true
+            address:
+              - ip: {{ node3_ip }}
+                prefix-length: {{ mask_len }}
+            dhcp: false
+      dns-resolver:
+        config:
+          server: 
+            - {{ dns_server }}
+      routes:
+        config:
+          - destination: 0.0.0.0/0
+            next-hop-address: {{ default_gw }}
+            next-hop-interface: {{ ifname }}

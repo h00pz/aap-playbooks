@@ -1,0 +1,7 @@
+## Stuff to install on linux hosts
+- hosts:
+    - all
+  roles:
+    - bind-dns
+    - manifests
+    - pxeboot

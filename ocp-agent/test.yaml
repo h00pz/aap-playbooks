@@ -1,0 +1,5 @@
+## Stuff to install on linux hosts
+- hosts:
+    - all
+  roles:
+    - pxeboot
