@@ -15,37 +15,37 @@
   template:
     src: n1-tftp.j2
     dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ n1_new_mac }}"
-  when: boot_method = "bios"
+  when: boot_method == "bios"
 
 - name: BIOS - set pxeboot for n2 based on mac
   template:
     src: n2-tftp.j2
     dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ n2_new_mac }}"
-  when: boot_method = "bios"
+  when: boot_method == "bios"
 
 - name: BIOS - set pxeboot for n3 based on mac
   template:
     src: n3-tftp.j2
     dest: "/var/lib/tftpboot/pxelinux.cfg/01-{{ n3_new_mac }}"
-  when: boot_method = "bios"
+  when: boot_method == "bios"
 
 - name: UEFI - set pxeboot for n1 based on mac
   template:
     src: n1-uefi.j2
     dest: "{{ tftp_dir }}/uefi/grub.cfg-01-{{ n1_new_mac }}"
-  when: boot_method = "uefi"
+  when: boot_method == "uefi"
 
 - name: UEFI - set pxeboot for n2 based on mac
   template:
     src: n2-uefi.j2
     dest: "{{ tftp_dir }}/uefi/grub.cfg-01-{{ n2_new_mac }}"
-  when: boot_method = "uefi"
+  when: boot_method == "uefi"
 
 - name: UEFI - set pxeboot for n3 based on mac
   template:
     src: n3-uefi.j2
     dest: "{{ tftp_dir }}/uefi/grub.cfg-01-{{ n3_new_mac }}"
-  when: boot_method = "uefi"
+  when: boot_method == "uefi"
 
 #- name: set servers to pxeboot
 #  community.general.ipmi_boot:

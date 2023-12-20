@@ -69,15 +69,15 @@
 
 - name: BIOS - Copy pxeboot artifacts to webserver
   shell: "cp {{ manifest_dir }}/{{ cluster_name }}/boot-artifacts/* {{ web_dir }}/{{ cluster_name }}/"
-  when: boot_method = "bios"
+  when: boot_method == "bios"
 
 - name: Create UEFI artifacts
   file:
     path: "{{ tftp_dir }}/uefi/clusters/{{ cluster_name }}/"
     state: directory
-  when: boot_method = "uefi"
+  when: boot_method == "uefi"
 
 - name: EUFI - copy pxeboot artifacts to webserver
   shell: "cp {{ manifest_dir }}/{{ cluster_name }}/boot-artifacts/* {{ tftp_dir }}/uefi/clusters/{{ cluster_name }}/"
-  when: boot_method = "uefi"
+  when: boot_method == "uefi"
   #todo only copy vmlinux and initrd
