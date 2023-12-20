@@ -11,7 +11,7 @@ controlPlane:
   name: master
   replicas: 3
 metadata:
-  name: agent
+  name: {{ cluster_name }}
 networking:
   clusterNetwork:
   - cidr: {{ cluster_net }}

@@ -1,7 +1,7 @@
 apiVersion: v1beta1
 kind: AgentConfig
 metadata:
-  name: agent
+  name: {{ cluster_name }}
 bootArtifactsBaseURL: {{ pxeboot_http }}
 hosts: 
   - hostname: {{ node1_name }}  
