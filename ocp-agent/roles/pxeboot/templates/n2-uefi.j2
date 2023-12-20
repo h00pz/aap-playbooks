@@ -4,3 +4,4 @@ set timeout=3
 menuentry '{{ node2_name }}' {
     linuxefi uefi/clusters/{{ cluster_name }}/agent.x86_64-vmlinuz ip=dhcp coreos.live.rootfs_url={{ pxeboot_http }}/agent.x86_64-rootfs.img ignition.firstboot ignition.platform.id=metal
     initrdefi uefi/clusters/{{cluster_name }}/agent.x86_64-initrd.img
+}
