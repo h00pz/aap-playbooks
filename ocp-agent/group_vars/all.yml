@@ -13,11 +13,14 @@ internal_dns_user:
 internal_dns_pass: 
 
 ## OCP Manifest Vars
+# DO NOT ADD TRAILING / TO ANY dir var
 #
+boot_method:  uefi    #options are bios or uefi
+tftp_dir:     /var/lib/tftboot
 manifest_dir: /opt/manifests
 web_dir:      /var/www/html/clusters
 ansible_user: cloud-user
-pxeboot_http: http://192.168.1.100/clusters/{{ cluster_name }}/
+pxeboot_http: http://192.168.1.100/clusters/{{ cluster_name }}
 ifname:       enp1s0
 disk:         /dev/sda
 mask_len:     24
