@@ -1,4 +1,5 @@
 ---
+testing_gitignore: "yes"
 #enable debugging:
 enable_debug: "yes"
 
