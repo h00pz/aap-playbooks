@@ -1,0 +1,10 @@
+---
+- name: download gitops operator yaml
+  get_url:
+    url: https://raw.githubusercontent.com/h00pz/ocp-gitops/main/1_install_rh_gitops_operator.yaml
+    dest: /tmp/1_install_rh_gitops_operator.yaml
+
+- name: add the gitops operator to the new cluster
+  shell: "oc --kubeconfig={{ kubeconfig_file }} apply -f /tmp/1_install_rh_gitops_operator.yaml"
+  register: command_customca_configmap
+  ignore_errors: yes

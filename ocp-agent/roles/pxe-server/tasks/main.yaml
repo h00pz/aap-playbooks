@@ -1,0 +1,10 @@
+---
+- name: PXE Server Setup - Check for needed prerequisites
+  package:
+    name:
+      - yum-utils
+      - tftp-server
+    state: present
+  when: ansible_os_family == 'RedHat'
+
+- name: PXE Server Setup - Download 

@@ -1,0 +1,49 @@
+---
+- name: Ensure NFS and pip utilities are installed (RedHat/CentOS)
+  package:
+    name:
+      - nfs-utils
+      - pip
+    state: present
+  when: ansible_os_family == 'RedHat'
+  become: true
+
+- name: Ensure pyopenssl is installed
+  ansible.builtin.pip:
+    name: pyopenssl
+    state: present
+  become: yes
+
+- name: Ensure local directory mount directory exists
+  file:
+    path: "{{local_path}}"
+    state: directory
+  become: true
+
+- name: Change directory local_path to current ansible user
+  ansible.builtin.file:
+    path: "{{ local_path }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0755'
+  become: true
+
+- name: Mount the NFS directory
+  mount:
+    path: "{{local_path}}"
+    src: "{{nfs_server}}:{{nfs_server_path}}"
+    fstype: nfs
+    opts: "{{nfs_opts}}"
+    state: mounted
+  become: true
+
+- name: "Create directories"
+  file:
+    path: "{{ local_path }}/{{ item }}"
+    state: directory
+  with_items:
+    - account
+    - certs
+    - csrs
+    - keys
+    - kubeconfig
