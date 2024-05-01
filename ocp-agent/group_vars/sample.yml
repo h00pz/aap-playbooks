@@ -2,6 +2,8 @@
 #enable debugging:
 #enable_debug: "yes"
 
+##PXE Server
+pxe_server: 192.168.1.100
 
 ## Cluster Vars
 #
@@ -15,7 +17,7 @@ internal_dns_pass:
 ## OCP Manifest Vars
 # DO NOT ADD TRAILING / TO ANY dir var
 #
-boot_method:  uefi    #options are bios or uefi
+boot_method:  bios    #options are bios or uefi
 tftp_dir:     /var/lib/tftboot
 manifest_dir: /opt/manifests
 web_dir:      /var/www/html/clusters
@@ -50,3 +52,8 @@ node3_ipmi:   192.168.2.23
 
 pull_secret: '<paste in your redhat pullsecret here>'
 ssh_key: "paste in your ssh public key here"
+
+## OCP Clients
+#
+ocp_client: https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable/openshift-client-linux.tar.gz
+ocp_installer: https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable/openshift-install-linux.tar.gz

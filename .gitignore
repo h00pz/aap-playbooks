@@ -1,2 +1,2 @@
-cert-mgmt/group_vars/
-ocp-agent/group_vars/
+cert-mgmt/group_vars/all.yml
+ocp-agent/group_vars/all.yml

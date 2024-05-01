@@ -1,0 +1,8 @@
+---
+## Certificate Mgmt Playbook
+- hosts:
+    - all
+  roles:
+    - files-n-dirs
+    - bind-dns
+    - acme-certificate

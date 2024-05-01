@@ -1,52 +1,21 @@
 ---
-- name: check to see if cluster_deployment.clusterName is defined and if not set cluster_name
-  set_fact:
-    cluster_name: "{{ ocp_cluster_name }}"
-  when: cluster_deployment.clusterName is not defined
-
-- name: check to see if cluster_deployment.baseDomain is defined and if not set cluster_domain
-  set_fact:
-    domain_name: "{{ ocp_domain_name }}"
-  when: cluster_deployment.baseDomain is not defined
-
-- name: check to see if install_config.platform.vsphere.apiVIP is defined and setting it to cluster_api_vip
-  set_fact:
-    cluster_api_vip: "{{ install_config.platform.vsphere.apiVIP }}"
-  when: install_config.platform.vsphere.apiVIP is defined
-
-- name: check to see if install_config.platform.vsphere.ingressVIP is defined and setting it to cluster_ingress_vip
-  set_fact:
-    cluster_ingress_vip: "{{ install_config.platform.vsphere.ingressVIP }}"
-  when: install_config.platform.vsphere.ingressVIP is defined
-
 - name: Ensure dnspython is installed
   ansible.builtin.pip:
     name: dnspython
     state: present
   become: yes
+  when: new_host == "yes"
 
-- name: Add API_VIP record if it does not exist
+- name: Add new hosts DNS record if it does not exist
   community.general.nsupdate:
     server: "{{ internal_dns_server }}"
     zone: "{{ domain_name }}"
-    record: "api.{{ cluster_name }}"
-    value: "{{ cluster_api_vip }}"
+    record: "{{ host_name }}"
+    value: "{{ host_ip }}"
     type: "A"
     ttl: 300
     key_name: "{{ internal_dns_user }}"
     key_secret: "{{ internal_dns_pass }}"
     key_algorithm: "hmac-sha256"
     state: present
-
-- name: Add Ingress_VIP record if it does not exist
-  community.general.nsupdate:
-    server: "{{ internal_dns_server }}"
-    zone: "{{ domain_name }}"
-    record: "*.apps.{{ cluster_name }}"
-    value: "{{ cluster_ingress_vip }}"
-    type: "A"
-    ttl: 300
-    key_name: "{{ internal_dns_user }}"
-    key_secret: "{{ internal_dns_pass }}"
-    key_algorithm: "hmac-sha256"
-    state: present
+  when: new_host == "yes"

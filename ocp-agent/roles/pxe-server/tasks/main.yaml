@@ -4,6 +4,8 @@
     name:
       - yum-utils
       - tftp-server
+      - syslinux
+      - httpd
     state: present
   when: ansible_os_family == 'RedHat'
 

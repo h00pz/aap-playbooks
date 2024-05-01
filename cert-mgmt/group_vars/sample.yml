@@ -1,0 +1,35 @@
+---
+#enable debugging:
+enable_debug: "yes"
+
+#set local username if necessary
+ansible_user: "redhat"
+
+#DNS Host Vars
+new_host: "yes"
+host_name: "*"
+host_ip: "192.168.1.1"
+domain_name: "example"
+
+#DNS Server Vars
+external_dns_user: "sample"
+external_dns_pass: "sample"
+internal_dns_user: "sample"
+internal_dns_pass: "sample"
+
+record_ttl: 300
+internal_dns_server: 192.168.1.1
+
+#Path & NFS
+local_path: /opt/certs          #local mount point 
+nfs_server: nfs.example.com
+nfs_server_path: /mnt/certs
+nfs_opts: defaults
+
+#Certificate Vars
+#acme_directory: https://acme-v02.api.letsencrypt.org/directory
+acme_directory: https://acme-staging-v02.api.letsencrypt.org/directory
+acme_org: example.com
+acme_org_ou: IT
+acme_country: US
+acme_email: admin@example.com

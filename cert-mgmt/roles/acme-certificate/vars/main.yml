@@ -1,50 +1,20 @@
 ---
 #Certificate Vars
 acme_challenge_type: dns-01
-acme_directory: https://acme-v02.api.letsencrypt.org/directory
 acme_version: 2
-acme_challenge_host: "_acme-challenge.apps.{{ cluster_name }}.{{ domain_name }}."
-acme_cn: "*.apps.{{ cluster_name }}.{{ domain_name }}"
-acme_org: h00pz.co
-acme_org_ou: IT
-acme_country: US
-acme_email: mh@h00pz.co
+acme_challenge_host: "_acme-challenge.{{ host_name }}.{{ domain_name }}."
+acme_cn: "{{ host_name }}.{{ domain_name }}"
 acme_dir: "{{ local_path }}"
 acme_keys_dir: "{{ local_path }}/keys"
 acme_csrs_dir: "{{ local_path }}/csrs"
 acme_certs_dir: "{{ local_path }}/certs"
-kubeconfig_dir: "{{ local_path }}/kubeconfig"
-kubeconfig_file: "{{ kubeconfig_dir }}/{{ cluster_name }}.kubeconfig"
 acme_account_key: "{{ local_path }}/account/account.key"
-acme_private_key: "{{ acme_keys_dir }}/{{ cluster_name }}.{{ domain_name }}.key"
-acme_csr: "{{ acme_csrs_dir }}/{{ cluster_name }}.{{ domain_name }}.csr"
-acme_crt: "{{ acme_certs_dir }}/{{ cluster_name }}.{{ domain_name }}.crt"
-acme_full_chain: "{{ acme_certs_dir }}/{{ cluster_name }}.{{ domain_name }}-fullchain.crt"
-acme_chain: "{{ acme_certs_dir }}/{{ cluster_name }}.{{ domain_name }}-intermediate.crt"
+acme_private_key: "{{ acme_keys_dir }}/{{ host_name }}.{{ domain_name }}.key"
+acme_csr: "{{ acme_csrs_dir }}/{{ host_name }}.{{ domain_name }}.csr"
+acme_crt: "{{ acme_certs_dir }}/{{ host_name }}.{{ domain_name }}.crt"
+acme_full_chain: "{{ acme_certs_dir }}/{{ host_name }}.{{ domain_name }}-fullchain.crt"
+acme_chain: "{{ acme_certs_dir }}/{{ host_name }}.{{ domain_name }}-intermediate.crt"
 
 record_type: "TXT"
-record_host: "_acme-challenge.apps.{{cluster_name}}"
+record_host: "_acme-challenge.{{host_name}}"
 record_ttl: 300
-
-#Certificate Vars
-acme_challenge_type: dns-01
-acme_directory: https://acme-v02.api.letsencrypt.org/directory
-acme_version: 2
-acme_challenge_host: "_acme-challenge.apps.{{ cluster_name }}.{{ domain_name }}."
-acme_cn: "*.apps.{{ cluster_name }}.{{ domain_name }}"
-acme_org: h00pz.co
-acme_org_ou: IT
-acme_country: US
-acme_email: mh@h00pz.co
-acme_dir: "{{ local_path }}"
-acme_keys_dir: "{{ local_path }}/keys"
-acme_csrs_dir: "{{ local_path }}/csrs"
-acme_certs_dir: "{{ local_path }}/certs"
-kubeconfig_dir: "{{ local_path }}/kubeconfig"
-kubeconfig_file: "{{ kubeconfig_dir }}/{{ cluster_name }}.kubeconfig"
-acme_account_key: "{{ local_path }}/account/account.key"
-acme_private_key: "{{ acme_keys_dir }}/{{ cluster_name }}.{{ domain_name }}.key"
-acme_csr: "{{ acme_csrs_dir }}/{{ cluster_name }}.{{ domain_name }}.csr"
-acme_crt: "{{ acme_certs_dir }}/{{ cluster_name }}.{{ domain_name }}.crt"
-acme_full_chain: "{{ acme_certs_dir }}/{{ cluster_name }}.{{ domain_name }}-fullchain.crt"
-acme_chain: "{{ acme_certs_dir }}/{{ cluster_name }}.{{ domain_name }}-intermediate.crt"

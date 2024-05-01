@@ -1,8 +1,69 @@
 ---
-- name: check the value of cluster_deployment.baseDomain
+- name: check the value host_name and see if it starts with a wildcard
+  set_fact:
+    starts_with_wildcard: "{{ host_name.startswith('*') }}"
+
+- name: Print starts_with_wildcard 
   debug:
-    var: cluster_deployment.baseDomain
-  
+    var: starts_with_wildcard
+  when: enable_debug == "yes"
+
+- name: check the value host_name and see if it contains subdomains
+  set_fact:
+    contains_sub_domains: "{{ host_name | regex_search('\\.') is not none }}"
+
+- name: Print contains_sub_domains
+  debug:
+    var: contains_sub_domains
+  when: enable_debug == "yes"
+
+- name: when wildcard is present and no subdomains
+  set_fact:
+    acme_private_key: "{{ acme_keys_dir }}/wildcard.{{ domain_name }}.key"
+    acme_csr: "{{ acme_csrs_dir }}/wildcard.{{ domain_name }}.csr"
+    acme_crt: "{{ acme_certs_dir }}/wildcard.{{ domain_name }}.crt"
+    acme_full_chain: "{{ acme_certs_dir }}/wildcard.{{ domain_name }}-fullchain.crt"
+    acme_chain: "{{ acme_certs_dir }}/wildcard.{{ domain_name }}-intermediate.crt"
+    acme_challenge_host: "_acme-challenge.{{ domain_name }}."
+  when: 
+    - starts_with_wildcard == true
+    - contains_sub_domains == false
+
+- name: Debug when wildcard is present and no subdomains
+  debug:
+    vars: 
+      - acme_private_key
+      - acme_csr
+      - acme_crt
+      - acme_full_chain
+      -  acme_chain
+      - acme_challenge_host
+  when: enable_debug == "yes"
+
+- name: when wildcard and subdomains present
+  set_fact:
+    rewritten_hostname: "{{ host_name | regex_replace('^\\*', 'wildcard') }}"
+    acme_private_key: "{{ acme_keys_dir }}/{{ rewritten_hostname }}.{{ domain_name }}.key"
+    acme_csr: "{{ acme_csrs_dir }}/{{ rewritten_hostname }}.{{ domain_name }}.csr"
+    acme_crt: "{{ acme_certs_dir }}/{{ rewritten_hostname }}.{{ domain_name }}.crt"
+    acme_full_chain: "{{ acme_certs_dir }}/{{ rewritten_hostname }}.{{ domain_name }}-fullchain.crt"
+    acme_chain: "{{ acme_certs_dir }}/{{ rewritten_hostname }}.{{ domain_name }}-intermediate.crt"
+  when: 
+    - starts_with_wildcard == true
+    - contains_sub_domains == true
+
+- name: Debug when wildcard and subdomains present
+  debug:
+    vars: 
+      - rewritten_hostname
+      - acme_private_key
+      - acme_csr
+      - acme_crt
+      - acme_full_chain
+      - acme_chain
+      - acme_challenge_host
+  when: enable_debug == "yes"
+
 - name: Check if account key exists
   stat:
     path: "{{ acme_account_key }}"
@@ -70,16 +131,6 @@
   meta: end_play
   when: acme_challenge.cert_days != -1
   #todo fix for less than 30 days
-
-- name: check to see if cluster_deployment.clusterName is defined and if not set cluster_name
-  set_fact:
-    cluster_name: "{{ ocp_cluster_name }}"
-  when: cluster_deployment.clusterName is not defined
-
-- name: check to see if cluster_deployment.baseDomain is defined and if not set cluster_domain
-  set_fact:
-    domain_name: "{{ ocp_domain_name }}"
-  when: cluster_deployment.baseDomain is not defined
 
 - name: Get all DNS records for the domain
   uri:
