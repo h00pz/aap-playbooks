@@ -35,7 +35,7 @@
 - name: Ensure a file is executable
   file:
     path: "{{ item }}"
-      mode: u+x
+    mode: u+x
   with_items:
     - "/usr/local/bin/oc"
     - "/usr/local/bin/openshift-install"
