@@ -52,7 +52,7 @@
     name: "{{ item }}"
     user: "{{ ipmi_user }}"
     password: "{{ ipmi_pass }}"
-    bootdev: pxe
+    bootdev: network
     state: present
   with_items:
     - "{{ node1_ipmi }}"
