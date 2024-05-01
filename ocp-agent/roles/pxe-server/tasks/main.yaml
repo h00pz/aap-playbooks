@@ -6,5 +6,6 @@
       - tftp-server
       - syslinux
       - httpd
+      - nmstate
     state: present
   when: ansible_os_family == 'RedHat'
