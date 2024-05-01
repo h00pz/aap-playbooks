@@ -1,11 +1,9 @@
 ---
 - name: Preparing OCP client
-  when: ocp_client is defined
-  block:
-  - name: Downloading OCP4 client
-    get_url:
+  get_url:
       url: "{{ ocp_client }}"
       dest: /usr/local/src/openshift-client-linux.tar.gz
+  when: ocp_client is defined
 
 - name: Unarchiving OCP4 client
   unarchive:
@@ -14,12 +12,10 @@
     remote_src: yes
 
 - name: Preparing OCP installer
-  when: ocp_installer is defined
-  block:
-  - name: Downloading OCP4 Installer
   get_url:
     url: "{{ ocp_installer }}"
     dest: /usr/local/src/openshift-install-linux.tar.gz
+  when: ocp_installer is defined
 
 - name: Unarchiving OCP4 Installer
   unarchive:
