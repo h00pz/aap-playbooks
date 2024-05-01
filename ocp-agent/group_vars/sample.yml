@@ -37,6 +37,8 @@ cluster_net_len: 23
 
 ## Node Specifics
 #  
+ipmi_user:    user1
+ipmi_pass: 
 node1_name:   n1-testing.example.com
 node1_mac:    02:8f:40:01:02:01
 node1_ip:     192.168.2.20

@@ -51,7 +51,7 @@
   community.general.ipmi_boot:
     name: "{{ item }}"
     user: "{{ ipmi_user }}"
-    password: "{{ ipmi_password }}"
+    password: "{{ ipmi_pass }}"
     bootdev: pxe
     state: present
   with_items:
@@ -63,7 +63,7 @@
   community.general.ipmi_power:
     name: "{{ item }}"
     user: "{{ ipmi_user }}"
-    password: "{{ ipmi_password }}"
+    password: "{{ ipmi_pass }}"
     state: on
   with_items:
     - "{{ node1_ipmi }}"
