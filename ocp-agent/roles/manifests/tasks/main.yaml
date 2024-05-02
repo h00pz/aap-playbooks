@@ -108,6 +108,14 @@
   shell: "cp {{ manifest_dir }}/{{ cluster_name }}/boot-artifacts/* {{ web_dir }}/{{ cluster_name }}/"
   when: boot_method == "bios"
 
+- name: create sym link for pxeboot artifacts to the tftserver
+  file:
+    src: "{{ manifest_dir }}/{{ cluster_name }}/boot-artifacts/"
+    dest: "{{ tftp_dir }}/clusters/{{ cluster_name }}/"
+    state: link
+    force: yes
+  when: boot_method == "bios"
+
 - name: Create UEFI artifacts
   file:
     path: "{{ tftp_dir }}/uefi/clusters/{{ cluster_name }}/"
