@@ -83,6 +83,7 @@
   with_items:
     - "{{ manifest_dir }}"
     - "{{ web_dir }}"
+    - "{{ tftp_dir }}/clusters/"
 
 - name: Create cluster manifest directories
   file:
@@ -115,7 +116,7 @@
   when: boot_method == "bios"
 
 - name: BIOS - Copy pxeboot artifacts to tftserver
-  shell: "cp {{ manifest_dir }}/{{ cluster_name }}/boot-artifacts/* {{ tftp_dir }}/clusters/{{ cluster_name }}"
+  shell: "cp {{ manifest_dir }}/{{ cluster_name }}/boot-artifacts/* {{ tftp_dir }}/clusters/{{ cluster_name }}/"
   when: boot_method == "bios"
 
 - name: Create UEFI artifacts
