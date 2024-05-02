@@ -115,7 +115,7 @@
   when: boot_method == "bios"
 
 - name: BIOS - Copy pxeboot artifacts to tftserver
-  shell: "cp {{ manifest_dir }}/{{ cluster_name }}/boot-artifacts/* {{ web_dir }}/{{ cluster_name }}/"
+  shell: "cp {{ manifest_dir }}/{{ cluster_name }}/boot-artifacts/* {{ tftp_dir }}/clusters/{{ cluster_name }}"
   when: boot_method == "bios"
 
 - name: Create UEFI artifacts
