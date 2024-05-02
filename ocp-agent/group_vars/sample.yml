@@ -23,6 +23,7 @@ manifest_dir: /opt/manifests
 web_dir:      /var/www/html/clusters
 ansible_user: cloud-user
 pxeboot_http: http://192.168.1.100/clusters/{{ cluster_name }}
+pxeboot_file: /clusters/{{ cluster_name }}
 ifname:       enp1s0
 disk:         /dev/sda
 mask_len:     24

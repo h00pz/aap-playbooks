@@ -66,6 +66,12 @@
     state: directory
   become: true
 
+- name: ensure tft cluster directory exists
+  file:
+    path: "{{ tftp_dir }}/clusters/{{ cluster_name }}"
+    state: directory
+  become: true
+
 - name: Change directory local_path to current ansible user
   ansible.builtin.file:
     path: "{{ item }}"
@@ -108,12 +114,8 @@
   shell: "cp {{ manifest_dir }}/{{ cluster_name }}/boot-artifacts/* {{ web_dir }}/{{ cluster_name }}/"
   when: boot_method == "bios"
 
-- name: create sym link for pxeboot artifacts to the tftserver
-  file:
-    src: "{{ manifest_dir }}/{{ cluster_name }}/boot-artifacts/"
-    dest: "{{ tftp_dir }}/clusters/{{ cluster_name }}/"
-    state: link
-    force: yes
+- name: BIOS - Copy pxeboot artifacts to tftserver
+  shell: "cp {{ manifest_dir }}/{{ cluster_name }}/boot-artifacts/* {{ web_dir }}/{{ cluster_name }}/"
   when: boot_method == "bios"
 
 - name: Create UEFI artifacts
