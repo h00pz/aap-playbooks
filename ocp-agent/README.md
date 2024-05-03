@@ -8,8 +8,8 @@ This playbook assumes the following:
 * The network you're on has a DHCP. 
 * The DHCP server is configured to set the default BIOS name to "pxelinux.0" for the segment that your systems you want to build into a OpenShift cluster will be on.
 * You have setup your PXE server according the docs of your OS 
-⋅⋅* [redhat](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/performing_an_advanced_rhel_8_installation/preparing-for-a-network-install_installing-rhel-as-an-experienced-user) 
-⋅⋅*[centos] (https://docs.centos.org/en-US/8-docs/advanced-install/assembly_preparing-for-a-network-install/)
+  *[redhat](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/performing_an_advanced_rhel_8_installation/preparing-for-a-network-install_installing-rhel-as-an-experienced-user) 
+  *[centos] (https://docs.centos.org/en-US/8-docs/advanced-install/assembly_preparing-for-a-network-install/)
 * This playbook automatically setups DNS records (needed for your OpenShift cluster) for a BIND DNS server.  Your might be different and you would need to modify or disable the bind-dns role.
 * This playbook assumes you have disabled selinux.
 * If you are running this from Ansible Automation Platform you will need to use a custom execution environment to run this playbook as there are specific collections required.  The collection/requirements.yml file is not reprentative of the actual list, I'm just lazy and put everything including the kitchen sink into that list.  Im using my own custom execution environment found [here] (quay.io/markhooper27/ansible_ee/custom_ee)
