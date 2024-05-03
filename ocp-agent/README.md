@@ -32,7 +32,7 @@ Install a CentOS 8 / RHEL 8 server with this recommended setup:
 Inside the group_vars directory there is a sample.yml file.  You need to copy this to all.yml.   Once you have done that you will then need to customize all the variables for the cluster you want to build.
 
 ## Varible Values for All.yml
-...
+```
 enable_debug:        "yes"  #this turns on debug level tasks within the playbook to see various tasks outputs
 
 pxe_server:          192.168.1.100  #the IP address of the PXE server that will be used for the cluster being built
@@ -77,4 +77,4 @@ pull_secret:         'paste in your redhat pullsecret here'
 ssh_key:             "paste in your ssh public key here"
 ocp_client:          https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable/openshift-client-linux.tar.gz
 ocp_installer:       https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/stable/openshift-install-linux.tar.gz
-...
+```
