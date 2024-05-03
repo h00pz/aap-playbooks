@@ -12,6 +12,7 @@ This playbook assumes the following:
 ** [centos] (https://docs.centos.org/en-US/8-docs/advanced-install/assembly_preparing-for-a-network-install/)
 * This playbook automatically setups DNS records (needed for your OpenShift cluster) for a BIND DNS server.  Your might be different and you would need to modify or disable the bind-dns role.
 * This playbook assumes you have disabled selinux.
+* If you are running this from Ansible Automation Platform you will need to use a custom execution environment to run this playbook as there are specific collections required.  The collection/requirements.yml file is not reprentative of the actual list, I'm just lazy and put everything including the kitchen sink into that list.  Im using my own custom execution environment found [here] (quay.io/markhooper27/ansible_ee/custom_ee)
 
 ## Prereqs
 Install a CentOS 8 / RHEL 8 server with this recommended setup:
