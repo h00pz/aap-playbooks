@@ -8,6 +8,12 @@
   when: ansible_os_family == 'RedHat'
   become: true
 
+- name: Upgrade pip
+  pip:
+    name: pip
+    state: latest
+    executable: pip3
+
 - name: Ensure pyopenssl is installed
   ansible.builtin.pip:
     name: pyopenssl
