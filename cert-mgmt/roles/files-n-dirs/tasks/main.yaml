@@ -3,7 +3,7 @@
   package:
     name:
       - nfs-utils
-      - pip3
+      - python3-pip
     state: present
   when: ansible_os_family == 'RedHat'
   become: true
