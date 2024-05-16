@@ -34,12 +34,12 @@
     var: item
   when: enable_debug == "yes"
   with_items:
-      - acme_private_key
-      - acme_csr
-      - acme_crt
-      - acme_full_chain
-      - acme_chain
-      - acme_challenge_host
+    - acme_private_key
+    - acme_csr
+    - acme_crt
+    - acme_full_chain
+    - acme_chain
+    - acme_challenge_host
 
 - name: when wildcard and subdomains present
   set_fact:
@@ -55,15 +55,16 @@
 
 - name: Debug when wildcard and subdomains present
   debug:
-    vars: 
-      - rewritten_hostname
-      - acme_private_key
-      - acme_csr
-      - acme_crt
-      - acme_full_chain
-      - acme_chain
-      - acme_challenge_host
+    var: item 
   when: enable_debug == "yes"
+  with_items:
+    - rewritten_hostname
+    - acme_private_key
+    - acme_csr
+    - acme_crt
+    - acme_full_chain
+    - acme_chain
+    - acme_challenge_host
 
 - name: Check if account key exists
   stat:
