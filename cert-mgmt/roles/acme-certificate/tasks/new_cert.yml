@@ -1,0 +1,155 @@
+---
+- name: check the value host_name and see if it starts with a wildcard
+  set_fact:
+    starts_with_wildcard: "{{ host_name.startswith('*') }}"
+
+- name: Print starts_with_wildcard 
+  debug:
+    var: starts_with_wildcard
+  when: enable_debug == "yes"
+
+- name: check the value host_name and see if it contains subdomains
+  set_fact:
+    contains_sub_domains: "{{ host_name | regex_search('\\.') is not none }}"
+
+- name: Print contains_sub_domains
+  debug:
+    var: contains_sub_domains
+  when: enable_debug == "yes"
+
+- name: when wildcard is present and no subdomains
+  set_fact:
+    acme_private_key: "{{ acme_keys_dir }}/wildcard.{{ domain_name }}.key"
+    acme_csr: "{{ acme_csrs_dir }}/wildcard.{{ domain_name }}.csr"
+    acme_crt: "{{ acme_certs_dir }}/wildcard.{{ domain_name }}.crt"
+    acme_full_chain: "{{ acme_certs_dir }}/wildcard.{{ domain_name }}-fullchain.crt"
+    acme_chain: "{{ acme_certs_dir }}/wildcard.{{ domain_name }}-intermediate.crt"
+    acme_challenge_host: "_acme-challenge.{{ domain_name }}."
+  when: 
+    - starts_with_wildcard == true
+    - contains_sub_domains == false
+
+- name: Debug when wildcard is present and no subdomains
+  debug:
+    vars: 
+      - acme_private_key
+      - acme_csr
+      - acme_crt
+      - acme_full_chain
+      -  acme_chain
+      - acme_challenge_host
+  when: enable_debug == "yes"
+
+- name: when wildcard and subdomains present
+  set_fact:
+    rewritten_hostname: "{{ host_name | regex_replace('^\\*', 'wildcard') }}"
+    acme_private_key: "{{ acme_keys_dir }}/{{ rewritten_hostname }}.{{ domain_name }}.key"
+    acme_csr: "{{ acme_csrs_dir }}/{{ rewritten_hostname }}.{{ domain_name }}.csr"
+    acme_crt: "{{ acme_certs_dir }}/{{ rewritten_hostname }}.{{ domain_name }}.crt"
+    acme_full_chain: "{{ acme_certs_dir }}/{{ rewritten_hostname }}.{{ domain_name }}-fullchain.crt"
+    acme_chain: "{{ acme_certs_dir }}/{{ rewritten_hostname }}.{{ domain_name }}-intermediate.crt"
+  when: 
+    - starts_with_wildcard == true
+    - contains_sub_domains == true
+
+- name: Debug when wildcard and subdomains present
+  debug:
+    vars: 
+      - rewritten_hostname
+      - acme_private_key
+      - acme_csr
+      - acme_crt
+      - acme_full_chain
+      - acme_chain
+      - acme_challenge_host
+  when: enable_debug == "yes"
+
+- name: Check if account key exists
+  stat:
+    path: "{{ acme_account_key }}"
+  register: account_key
+
+- name: Create account key
+  openssl_privatekey:
+    path: "{{ acme_account_key }}"
+    size: 4096
+    type: RSA
+  when: account_key.stat.exists == False
+
+- name: Check if the private key exists
+  stat:
+    path: "{{ acme_private_key }}"
+  register: private_key
+
+- name: Create private key
+  openssl_privatekey:
+    path: "{{ acme_private_key }}"
+    size: 4096
+    type: RSA
+  when: private_key.stat.exists == False
+
+- name: Check if the csr exists
+  stat:
+    path: "{{ acme_csr }}"
+  register: csr_key
+
+- name: Generate CSR
+  openssl_csr:
+    path: "{{ acme_csr }}"
+    privatekey_path: "{{ acme_private_key }}"
+    common_name: "{{ acme_cn }}"
+    organization_name: "{{ acme_org }}"
+    organizational_unit_name: "{{ acme_org_ou }}"
+    country_name: "{{ acme_country }}"
+    email_address: "{{ acme_email }}"
+  when: csr_key.stat.exists == False
+
+- name: Make sure account exists and has given contacts. We agree to TOS.
+  community.crypto.acme_account:
+    account_key_src: "{{ acme_account_key }}"
+    state: present
+    terms_agreed: true
+    acme_version: 2
+    acme_directory: "{{ acme_directory }}"
+    contact:
+    - "mailto:{{ acme_email }}"
+
+- name: Create a challenge using account key file.
+  community.crypto.acme_certificate:
+    account_key_src: "{{ acme_account_key }}"
+    account_email: "{{ acme_email }}"
+    src: "{{ acme_csr }}"
+    cert: "{{ acme_crt }}"
+    challenge: dns-01
+    acme_version: 2
+    acme_directory: "{{ acme_directory }}"
+    # Renew if the certificate is at least 30 days old
+    remaining_days: 60
+  register: acme_challenge
+
+- name: Exit if certificate is still valid
+  meta: end_play
+  when: acme_challenge.cert_days != -1
+  #todo fix for less than 30 days
+
+- name: Include DNS Update
+  include_tasks: dns_update.yml
+  when: new_host == "yes"
+
+- name: Validate challenge and retrieve the certs
+  community.crypto.acme_certificate:
+    account_key_src: "{{ acme_account_key }}"
+    account_email: "{{ acme_email }}"
+    src: "{{ acme_csr }}"
+    cert: "{{ acme_crt }}"
+    fullchain: "{{ acme_full_chain }}"
+    chain: "{{ acme_chain }}"
+    challenge: dns-01
+    remaining_days: 90
+    acme_version: 2
+    acme_directory: "{{ acme_directory }}"
+    remaining_days: 90
+    data: "{{ acme_challenge }}"
+  when: acme_challenge is changed
+  retries: 10
+  delay: 12

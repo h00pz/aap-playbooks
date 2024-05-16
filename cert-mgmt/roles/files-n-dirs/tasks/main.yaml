@@ -47,3 +47,4 @@
     - csrs
     - keys
     - kubeconfig
+    - chain

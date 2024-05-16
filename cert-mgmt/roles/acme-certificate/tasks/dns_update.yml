@@ -1,0 +1,103 @@
+---
+- name: Get all DNS records for the domain
+  uri:
+    url: "https://api.name.com/v4/domains/{{ domain_name }}/records"
+    user: "{{ external_dns_user }}"
+    password: "{{ external_dns_pass }}"
+    force_basic_auth: true
+    method: GET
+    headers:
+      Content-Type: "application/json"
+    return_content: yes
+  register: dns_records
+
+- name: Print DNS records
+  debug:
+    var: dns_records
+  when: 
+    - dns_records is defined 
+    - enable_debug == "yes"
+
+- name: setting temp dns fact
+  set_fact:
+    dns_records_content: "{{ dns_records.content }}"
+
+- name: debug dns_records_content
+  debug:
+    var: dns_records_content
+  when:
+    - dns_records_content is defined
+    - enable_debug == "yes"
+
+- name: Search for specific DNS record
+  set_fact:
+    desired_record: "{{ dns_records_content.records | json_query(query) }}"
+  vars:
+    query: "[?fqdn=='{{ acme_challenge_host }}'].id | [0]"
+
+- name: Print record of the desired DNS record
+  debug:
+    var: desired_record
+  when: 
+    - desired_record is defined
+    - enable_debug == "yes"
+
+- name: print acme challenge data
+  debug:
+    var: acme_challenge
+  when: enable_debug == "yes"
+
+- name: Collect acme challenge data
+  set_fact:
+    acme_txt_value: "{{ acme_challenge.challenge_data[acme_cn]['dns-01'].resource_value }}"
+
+- name: Print acme challenge data
+  debug:
+    var: acme_txt_value
+  when: enable_debug == "yes"
+
+- name: Update the TXT record
+  uri:
+    url: "https://api.name.com/v4/domains/{{ domain_name }}/records/{{ desired_record }}"
+    method: PUT
+    user: "{{ external_dns_user }}"
+    password: "{{ external_dns_pass }}"
+    force_basic_auth: true
+    headers:
+      Content-Type: "application/json"
+    body_format: json
+    body:
+      {
+        type: "{{ record_type }}",
+        ttl: "{{ record_ttl }}",
+	content: "{{ acme_txt_value }}",
+        answer: "{{ acme_txt_value }}"
+      }
+  register: dns_update_response
+  when: desired_record | length > 0
+
+- name: Create the TXT record
+  uri:
+    url: "https://api.name.com/v4/domains/{{ domain_name }}/records"
+    method: POST
+    user: "{{ external_dns_user }}"
+    password: "{{ external_dns_pass }}"
+    force_basic_auth: true
+    headers:
+      Content-Type: "application/json"
+    body_format: json
+    body:
+      {
+        type: "{{ record_type }}",
+        host: "{{ record_host }}",
+        content: "{{ acme_txt_value }}",
+        answer: "{{ acme_txt_value }}",
+        ttl: 300
+      }
+  register: dns_update_response
+  when: desired_record | length == 0
+
+- name: Print the response
+  debug:
+    var: dns_update_response.json
+  when: enable_debug == "yes"

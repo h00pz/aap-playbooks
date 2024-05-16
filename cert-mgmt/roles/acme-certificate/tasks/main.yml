@@ -1,254 +1,37 @@
 ---
-- name: check the value host_name and see if it starts with a wildcard
+---
+- name: Include New Certificate
+  include_tasks: new_cert.yml
+  when: new_host == "yes"
+
+- name: Find all .crt files in the directory
+  find:
+    paths: "{{ acme_certs_dir }}"
+    patterns: "*.crt"
+  register: crt_files
+  when: new_host == "no"
+
+- name: Set array variable with list of .crt files
   set_fact:
-    starts_with_wildcard: "{{ host_name.startswith('*') }}"
+    crt_file_list: "{{ crt_files.files | map(attribute='path') | list }}"
+  when: new_host == "no"
 
-- name: Print starts_with_wildcard 
+- name: Debug crt file list
   debug:
-    var: starts_with_wildcard
-  when: enable_debug == "yes"
+    var: crt_file_list
+  when: debug_enable == "yes"
 
-- name: check the value host_name and see if it contains subdomains
-  set_fact:
-    contains_sub_domains: "{{ host_name | regex_search('\\.') is not none }}"
+- name: Remove .crt string from certificate in the array
+      set_fact:
+        crt_file_list_clean: "{{ crt_file_list | map('regex_replace', .crt, '') | list }}"
 
-- name: Print contains_sub_domains
+- name: Debug cleaned up crt file list
   debug:
-    var: contains_sub_domains
-  when: enable_debug == "yes"
+    var: crt_file_list_clean
+  when: debug_enable == "yes"
 
-- name: when wildcard is present and no subdomains
-  set_fact:
-    acme_private_key: "{{ acme_keys_dir }}/wildcard.{{ domain_name }}.key"
-    acme_csr: "{{ acme_csrs_dir }}/wildcard.{{ domain_name }}.csr"
-    acme_crt: "{{ acme_certs_dir }}/wildcard.{{ domain_name }}.crt"
-    acme_full_chain: "{{ acme_certs_dir }}/wildcard.{{ domain_name }}-fullchain.crt"
-    acme_chain: "{{ acme_certs_dir }}/wildcard.{{ domain_name }}-intermediate.crt"
-    acme_challenge_host: "_acme-challenge.{{ domain_name }}."
-  when: 
-    - starts_with_wildcard == true
-    - contains_sub_domains == false
+- name: Include Daily Renew
+  include_tasks: daily_renew.yml
+  when: new_host == "no"
+  loop: " {{ crt_file_list_clean }}"
 
-- name: Debug when wildcard is present and no subdomains
-  debug:
-    vars: 
-      - acme_private_key
-      - acme_csr
-      - acme_crt
-      - acme_full_chain
-      -  acme_chain
-      - acme_challenge_host
-  when: enable_debug == "yes"
-
-- name: when wildcard and subdomains present
-  set_fact:
-    rewritten_hostname: "{{ host_name | regex_replace('^\\*', 'wildcard') }}"
-    acme_private_key: "{{ acme_keys_dir }}/{{ rewritten_hostname }}.{{ domain_name }}.key"
-    acme_csr: "{{ acme_csrs_dir }}/{{ rewritten_hostname }}.{{ domain_name }}.csr"
-    acme_crt: "{{ acme_certs_dir }}/{{ rewritten_hostname }}.{{ domain_name }}.crt"
-    acme_full_chain: "{{ acme_certs_dir }}/{{ rewritten_hostname }}.{{ domain_name }}-fullchain.crt"
-    acme_chain: "{{ acme_certs_dir }}/{{ rewritten_hostname }}.{{ domain_name }}-intermediate.crt"
-  when: 
-    - starts_with_wildcard == true
-    - contains_sub_domains == true
-
-- name: Debug when wildcard and subdomains present
-  debug:
-    vars: 
-      - rewritten_hostname
-      - acme_private_key
-      - acme_csr
-      - acme_crt
-      - acme_full_chain
-      - acme_chain
-      - acme_challenge_host
-  when: enable_debug == "yes"
-
-- name: Check if account key exists
-  stat:
-    path: "{{ acme_account_key }}"
-  register: account_key
-
-- name: Create account key
-  openssl_privatekey:
-    path: "{{ acme_account_key }}"
-    size: 4096
-    type: RSA
-  when: account_key.stat.exists == False
-
-- name: Check if the private key exists
-  stat:
-    path: "{{ acme_private_key }}"
-  register: private_key
-
-- name: Create private key
-  openssl_privatekey:
-    path: "{{ acme_private_key }}"
-    size: 4096
-    type: RSA
-  when: private_key.stat.exists == False
-
-- name: Check if the csr exists
-  stat:
-    path: "{{ acme_csr }}"
-  register: csr_key
-
-- name: Generate CSR
-  openssl_csr:
-    path: "{{ acme_csr }}"
-    privatekey_path: "{{ acme_private_key }}"
-    common_name: "{{ acme_cn }}"
-    organization_name: "{{ acme_org }}"
-    organizational_unit_name: "{{ acme_org_ou }}"
-    country_name: "{{ acme_country }}"
-    email_address: "{{ acme_email }}"
-  when: csr_key.stat.exists == False
-
-- name: Make sure account exists and has given contacts. We agree to TOS.
-  community.crypto.acme_account:
-    account_key_src: "{{ acme_account_key }}"
-    state: present
-    terms_agreed: true
-    acme_version: 2
-    acme_directory: "{{ acme_directory }}"
-    contact:
-    - "mailto:{{ acme_email }}"
-
-- name: Create a challenge using account key file.
-  community.crypto.acme_certificate:
-    account_key_src: "{{ acme_account_key }}"
-    account_email: "{{ acme_email }}"
-    src: "{{ acme_csr }}"
-    cert: "{{ acme_crt }}"
-    challenge: dns-01
-    acme_version: 2
-    acme_directory: "{{ acme_directory }}"
-    # Renew if the certificate is at least 30 days old
-    remaining_days: 90
-  register: acme_challenge
-
-- name: Exit if certificate is still valid
-  meta: end_play
-  when: acme_challenge.cert_days != -1
-  #todo fix for less than 30 days
-
-- name: Get all DNS records for the domain
-  uri:
-    url: "https://api.name.com/v4/domains/{{ domain_name }}/records"
-    user: "{{ external_dns_user }}"
-    password: "{{ external_dns_pass }}"
-    force_basic_auth: true
-    method: GET
-    headers:
-      Content-Type: "application/json"
-    return_content: yes
-  register: dns_records
-
-- name: Print DNS records
-  debug:
-    var: dns_records
-  when: 
-    - dns_records is defined 
-    - enable_debug == "yes"
-
-- name: setting temp dns fact
-  set_fact:
-    dns_records_content: "{{ dns_records.content }}"
-
-- name: debug dns_records_content
-  debug:
-    var: dns_records_content
-  when:
-    - dns_records_content is defined
-    - enable_debug == "yes"
-
-- name: Search for specific DNS record
-  set_fact:
-    desired_record: "{{ dns_records_content.records | json_query(query) }}"
-  vars:
-    query: "[?fqdn=='{{ acme_challenge_host }}'].id | [0]"
-
-- name: Print record of the desired DNS record
-  debug:
-    var: desired_record
-  when: 
-    - desired_record is defined
-    - enable_debug == "yes"
-
-- name: print acme challenge data
-  debug:
-    var: acme_challenge
-  when: enable_debug == "yes"
-
-- name: Collect acme challenge data
-  set_fact:
-    acme_txt_value: "{{ acme_challenge.challenge_data[acme_cn]['dns-01'].resource_value }}"
-
-- name: Print acme challenge data
-  debug:
-    var: acme_txt_value
-  when: enable_debug == "yes"
-
-- name: Update the TXT record
-  uri:
-    url: "https://api.name.com/v4/domains/{{ domain_name }}/records/{{ desired_record }}"
-    method: PUT
-    user: "{{ external_dns_user }}"
-    password: "{{ external_dns_pass }}"
-    force_basic_auth: true
-    headers:
-      Content-Type: "application/json"
-    body_format: json
-    body:
-      {
-        type: "{{ record_type }}",
-        ttl: "{{ record_ttl }}",
-	content: "{{ acme_txt_value }}",
-        answer: "{{ acme_txt_value }}"
-      }
-  register: dns_update_response
-  when: desired_record | length > 0
-
-- name: Create the TXT record
-  uri:
-    url: "https://api.name.com/v4/domains/{{ domain_name }}/records"
-    method: POST
-    user: "{{ external_dns_user }}"
-    password: "{{ external_dns_pass }}"
-    force_basic_auth: true
-    headers:
-      Content-Type: "application/json"
-    body_format: json
-    body:
-      {
-        type: "{{ record_type }}",
-        host: "{{ record_host }}",
-        content: "{{ acme_txt_value }}",
-        answer: "{{ acme_txt_value }}",
-        ttl: 300
-      }
-  register: dns_update_response
-  when: desired_record | length == 0
-
-- name: Print the response
-  debug:
-    var: dns_update_response.json
-  when: enable_debug == "yes"
-
-- name: Validate challenge and retrieve the certs
-  community.crypto.acme_certificate:
-    account_key_src: "{{ acme_account_key }}"
-    account_email: "{{ acme_email }}"
-    src: "{{ acme_csr }}"
-    cert: "{{ acme_crt }}"
-    fullchain: "{{ acme_full_chain }}"
-    chain: "{{ acme_chain }}"
-    challenge: dns-01
-    remaining_days: 90
-    acme_version: 2
-    acme_directory: "{{ acme_directory }}"
-    remaining_days: 90
-    data: "{{ acme_challenge }}"
-  when: acme_challenge is changed
-  retries: 10
-  delay: 12

@@ -1,0 +1,50 @@
+---
+- name: Make sure account exists and has given contacts. We agree to TOS.
+  community.crypto.acme_account:
+    account_key_src: "{{ acme_account_key }}"
+    state: present
+    terms_agreed: true
+    acme_version: 2
+    acme_directory: "{{ acme_directory }}"
+    contact:
+    - "mailto:{{ acme_email }}"
+
+- name: Create a challenge using account key file.
+  community.crypto.acme_certificate:
+    account_key_src: "{{ acme_account_key }}"
+    account_email: "{{ acme_email }}"
+    src: "{{ acme_certs_dir }}/{{ item }}.csr"
+    cert: "{{ acme_certs_dir }}/{{ item }}.crt"
+    challenge: dns-01
+    acme_version: 2
+    acme_directory: "{{ acme_directory }}"
+    # Renew if the certificate is at least 30 days old
+    remaining_days: 60
+  register: acme_challenge
+
+- name: Exit if certificate is still valid
+  meta: end_play
+  when: acme_challenge.cert_days != -1
+  #todo fix for less than 30 days
+
+- name: Include DNS Update
+  include_tasks: dns_update.yml
+
+- name: Validate challenge and retrieve the certs
+  community.crypto.acme_certificate:
+    account_key_src: "{{ acme_account_key }}"
+    account_email: "{{ acme_email }}"
+    src: "{{ acme_certs_dir }}/{{ item }}.csr"
+    cert: "{{ acme_certs_dir }}/{{ item }}.crt"
+    fullchain: "{{ acme_full_chain }}"
+    acme_full_chain: "{{ acme_chain_dir }}/{{ item }}-fullchain.crt"
+    chain: "{{ acme_chain_dir}}/{{ item }}-intermediate.crt"
+    challenge: dns-01
+    remaining_days: 90
+    acme_version: 2
+    acme_directory: "{{ acme_directory }}"
+    remaining_days: 90
+    data: "{{ acme_challenge }}"
+  when: acme_challenge is changed
+  retries: 10
+  delay: 12
