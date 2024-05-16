@@ -21,8 +21,8 @@
   when: debug_enable == "yes"
 
 - name: Remove .crt string from certificate in the array
-    set_fact:
-      crt_file_list_clean: "{{ crt_file_list | map('regex_replace', .crt, '') | list }}"
+  set_fact:
+    crt_file_list_clean: "{{ crt_file_list | map('regex_replace', .crt, '') | list }}"
 
 - name: Debug cleaned up crt file list
   debug:
