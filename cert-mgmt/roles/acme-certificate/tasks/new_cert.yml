@@ -31,14 +31,15 @@
 
 - name: Debug when wildcard is present and no subdomains
   debug:
-    vars: 
+    var: item
+  when: enable_debug == "yes"
+  with_items:
       - acme_private_key
       - acme_csr
       - acme_crt
       - acme_full_chain
-      -  acme_chain
+      - acme_chain
       - acme_challenge_host
-  when: enable_debug == "yes"
 
 - name: when wildcard and subdomains present
   set_fact:
