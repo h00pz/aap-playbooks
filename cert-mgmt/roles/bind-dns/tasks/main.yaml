@@ -4,7 +4,7 @@
     name: dnspython
     state: present
   become: yes
-  when: new_host == "yes" and (host_ip | default('')) | length > 0
+  when: new_host == "yes" and (host_ip | length > 0)
 
 - name: Add new hosts DNS record if it does not exist
   community.general.nsupdate:
@@ -18,4 +18,4 @@
     key_secret: "{{ internal_dns_pass }}"
     key_algorithm: "hmac-sha256"
     state: present
-  when: new_host == "yes" and (host_ip | default('')) | length > 0
+  when: new_host == "yes" and (host_ip | length > 0)
