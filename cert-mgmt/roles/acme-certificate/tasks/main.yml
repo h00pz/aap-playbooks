@@ -1,5 +1,4 @@
 ---
----
 - name: Include New Certificate
   include_tasks: new_cert.yml
   when: new_host == "yes"
