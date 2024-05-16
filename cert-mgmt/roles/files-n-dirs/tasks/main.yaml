@@ -42,6 +42,7 @@
     opts: "{{nfs_opts}}"
     state: mounted
   become: true
+  ignore_errors: yes
 
 - name: "Create directories"
   file:
