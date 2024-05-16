@@ -18,7 +18,7 @@
 - name: Debug crt file list
   debug:
     var: crt_file_list
-  when: debug_enable == "yes"
+  when: enable_debug == "yes"
 
 - name: Remove .crt string from certificate in the array
   set_fact:
@@ -27,7 +27,7 @@
 - name: Debug cleaned up crt file list
   debug:
     var: crt_file_list_clean
-  when: debug_enable == "yes"
+  when: enable_debug == "yes"
 
 - name: Include Daily Renew
   include_tasks: daily_renew.yml
