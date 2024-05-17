@@ -1,0 +1,3 @@
+{"msg": "Error message during polling", "failed": true, "changed": false}
+
+{"changed": false}

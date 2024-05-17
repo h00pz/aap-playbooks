@@ -1,0 +1,71 @@
+---
+- name: Run Standard Tests
+  when: test_win_share
+  module_defaults:
+    win_share:
+      name: "{{ test_win_share_name }}"
+      path: "{{ test_win_share_path }}"
+      state: present
+  block:
+    - name: Create Standard Test Folder
+      ansible.windows.win_file:
+        path: "{{ test_win_share_path }}"
+        state: directory
+
+    - name: Cleanup Standard Test Share
+      win_share: &cleanup_std_share
+        name: "{{ test_win_share_name }}"
+        state: absent
+
+    - name: Cleanup Standard Root Share
+      win_share: &cleanup_std_root_share
+        name: "ROOT_TEST"
+        state: absent
+
+    - name: Run Standard Tests
+      ansible.builtin.include_tasks: tests.yml
+      vars:
+        _share_name: "{{ test_win_share_name }}"
+  always:
+    - name: Cleanup Standard Test Share
+      win_share: *cleanup_std_share
+
+    - name: Cleanup Standard Root Share
+      win_share: *cleanup_std_root_share
+
+    - name: Cleanup Standard Test Folder
+      win_file:
+        path: "{{ test_win_share_path }}"
+        state: absent
+
+- name: Run Cluster Tests
+  when: test_win_share_cluster
+  module_defaults:
+    win_share:
+      name: "{{ test_win_share_cluster_name }}"
+      path: "{{ test_win_share_cluster_path }}"
+      scope_name: "{{ test_win_share_cluster_scope }}"
+      state: present
+  block:
+    - name: Create Cluster Test Folder
+      ansible.windows.win_file:
+        path: "{{ test_win_share_cluster_path }}"
+        state: directory
+
+    - name: Cleanup Cluster Test Share
+      win_share: &cleanup_cluster_share
+        name: "{{ test_win_share_cluster_name }}"
+        state: absent
+
+    - name: Run Cluster Tests
+      ansible.builtin.include_tasks: tests.yml
+      vars:
+        _share_name: "{{ test_win_share_cluster_name }}"
+  always:
+    - name: Cleanup Cluster Test Share
+      win_share: *cleanup_cluster_share
+
+    - name: Cleanup Cluster Test Folder
+      ansible.windows.win_file:
+        path: "{{ test_win_share_cluster_path }}"
+        state: absent
