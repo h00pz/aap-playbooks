@@ -14,6 +14,7 @@
     ca_path: "{{ acme_chain_dir }}/{{ item }}-fullchain.crt"
     command: "import"
     certificate_type: "HTTPS"
+    validate_certs: False
     certificate_path: "{{ acme_certs_dir }}/{{ item }}.crt"
     ssl_key: "{{ acme_keys_dir }}/{{ item }}.key"
   loop: "{{ ipmi_hosts }}"
