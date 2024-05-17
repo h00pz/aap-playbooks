@@ -37,3 +37,4 @@ acme_email: admin@example.com
 #IPMI Vars
 ipmi_user: admin
 ipmi_pass: passwoidz
+ipmi_hosts: ["host1-ipmi.example.com","host2-ipmi.example.com"]
