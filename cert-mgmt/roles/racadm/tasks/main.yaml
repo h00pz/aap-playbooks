@@ -1,12 +1,10 @@
 ---
 - name: set varaibles to import certifcates
   set_fact:
-    acme_dir: "{{ local_path }}"
     acme_keys_dir: "{{ local_path }}/keys"
     acme_csrs_dir: "{{ local_path }}/csrs"
     acme_certs_dir: "{{ local_path }}/certs"
     acme_chain_dir: "{{ local_path }}/chain"
-    acme_private_key: "{{ acme_keys_dir }}/{{ item }}.key"
     
 - name: Importing certificate
   dellemc.openmanage.idrac_certificates:
