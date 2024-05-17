@@ -5,7 +5,6 @@
       - nfs-utils
       - python3-pip
     state: present
-  when: ansible_os_family == 'RedHat'
   become: true
 
 - name: Upgrade pip
