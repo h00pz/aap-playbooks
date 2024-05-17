@@ -18,3 +18,4 @@
     certificate_path: "{{ acme_certs_dir }}/{{ item }}.crt"
     ssl_key: "{{ acme_keys_dir }}/{{ item }}.key"
   loop: "{{ ipmi_hosts }}"
+  ignore_errors: yes
