@@ -18,11 +18,12 @@
 - name: Debug crt file list
   debug:
     var: crt_file_list
-  when: enable_debug == "yes"
+  when: enable_debug == "yes" and new_host == "no"
 
 - name: Remove .crt string from certificate in the array
   set_fact:
     crt_file_list_clean: "{{ crt_file_list | map('regex_replace', .crt, '') | list }}"
+  when: new_host == "no"
 
 - name: Debug cleaned up crt file list
   debug:

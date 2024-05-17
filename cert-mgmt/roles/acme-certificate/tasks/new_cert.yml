@@ -22,8 +22,8 @@
     acme_private_key: "{{ acme_keys_dir }}/wildcard.{{ domain_name }}.key"
     acme_csr: "{{ acme_csrs_dir }}/wildcard.{{ domain_name }}.csr"
     acme_crt: "{{ acme_certs_dir }}/wildcard.{{ domain_name }}.crt"
-    acme_full_chain: "{{ acme_certs_dir }}/wildcard.{{ domain_name }}-fullchain.crt"
-    acme_chain: "{{ acme_certs_dir }}/wildcard.{{ domain_name }}-intermediate.crt"
+    acme_full_chain: "{{ acme_chain_dir }}/wildcard.{{ domain_name }}-fullchain.crt"
+    acme_chain: "{{ acme_chain_dir }}/wildcard.{{ domain_name }}-intermediate.crt"
     acme_challenge_host: "_acme-challenge.{{ domain_name }}."
   when: 
     - starts_with_wildcard == true
@@ -47,8 +47,8 @@
     acme_private_key: "{{ acme_keys_dir }}/{{ rewritten_hostname }}.{{ domain_name }}.key"
     acme_csr: "{{ acme_csrs_dir }}/{{ rewritten_hostname }}.{{ domain_name }}.csr"
     acme_crt: "{{ acme_certs_dir }}/{{ rewritten_hostname }}.{{ domain_name }}.crt"
-    acme_full_chain: "{{ acme_certs_dir }}/{{ rewritten_hostname }}.{{ domain_name }}-fullchain.crt"
-    acme_chain: "{{ acme_certs_dir }}/{{ rewritten_hostname }}.{{ domain_name }}-intermediate.crt"
+    acme_full_chain: "{{ acme_chain_dir }}/{{ rewritten_hostname }}.{{ domain_name }}-fullchain.crt"
+    acme_chain: "{{ acme_chain_dir }}/{{ rewritten_hostname }}.{{ domain_name }}-intermediate.crt"
   when: 
     - starts_with_wildcard == true
     - contains_sub_domains == true

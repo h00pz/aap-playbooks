@@ -33,3 +33,7 @@ acme_org: example.com
 acme_org_ou: IT
 acme_country: US
 acme_email: admin@example.com
+
+#IPMI Vars
+ipmi_user: admin
+ipmi_pass: passwoidz

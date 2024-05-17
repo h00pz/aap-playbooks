@@ -1,0 +1,7 @@
+---
+## Certificate Mgmt Playbook
+- hosts:
+    - all
+  roles:
+    - files-n-dirs
+    - racadm
