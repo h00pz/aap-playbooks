@@ -1,9 +1,9 @@
 ---
 ## Certificate Mgmt Playbook
-
-- hosts: 
+- hosts:
     - all
-  gather_facts: no
+
+  gather_facts: false
 
   roles:
     - files-n-dirs
