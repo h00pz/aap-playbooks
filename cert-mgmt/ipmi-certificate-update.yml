@@ -1,7 +1,10 @@
 ---
 ## Certificate Mgmt Playbook
-- hosts:
-    - all
+  gather_facts: no
+
+- hosts: all
+  gather_facts: no
+
   roles:
     - files-n-dirs
     - racadm
