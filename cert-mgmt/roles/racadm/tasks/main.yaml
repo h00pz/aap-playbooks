@@ -5,7 +5,8 @@
     acme_csrs_dir: "{{ local_path }}/csrs"
     acme_certs_dir: "{{ local_path }}/certs"
     acme_chain_dir: "{{ local_path }}/chain"
-    
+  when: idrac_ver == "8" or idrac_ver == "9"
+
 - name: Importing certificate
   dellemc.openmanage.idrac_certificates:
     idrac_ip: "{{ item }}"
@@ -18,4 +19,22 @@
     certificate_path: "{{ acme_certs_dir }}/{{ item }}.crt"
     ssl_key: "{{ acme_keys_dir }}/{{ item }}.key"
   loop: "{{ ipmi_hosts }}"
-  ignore_errors: yes
+  when: idrac_ver == "8" or idrac_ver == "9"
+
+- name: post private key to Dell harwdare
+  shell: idracadm7 -r {{ item }} -u {{ idrac_user }}  -p {{ idrac_pass }} sslkeyupload -t 1 -f {{ acme_keys_dir }}/{{ item }}.key --nocertwarn
+  ignore_errors: true
+  loop: "{{ ipmi_hosts }}"
+  when: idrac_ver == "7"
+
+- name: post certificate to Dell harwdare
+  shell: idracadm7 -r {{ item }} -u {{ idrac_user }} -p {{ idrac_pass }} sslcertupload -t 1 -f {{ acme_certs_dir }}/{{ item }}.crt --nocertwarn
+  ignore_errors: true
+  loop: "{{ ipmi_hosts }}"
+  when: idrac_ver == "7"
+
+- name: Restart idrac
+  shell: idracadm7 -r {{ item }} -u {{ idrac_user }} -p {{ idrac_pass }} racreset
+  ignore_errors: true
+  loop: "{{ ipmi_hosts }}"
+  when: idrac_ver == "7"
