@@ -22,19 +22,19 @@
   when: idrac_ver == "8" or idrac_ver == "9"
 
 - name: post private key to Dell harwdare
-  shell: idracadm7 -r {{ item }} -u {{ idrac_user }}  -p {{ idrac_pass }} sslkeyupload -t 1 -f {{ acme_keys_dir }}/{{ item }}.key --nocertwarn
+  shell: idracadm7 -r {{ item }} -u {{ ipmi_user }}  -p {{ ipmi_pass }} sslkeyupload -t 1 -f {{ acme_keys_dir }}/{{ item }}.key --nocertwarn
   ignore_errors: true
   loop: "{{ ipmi_hosts }}"
   when: idrac_ver == "7"
 
 - name: post certificate to Dell harwdare
-  shell: idracadm7 -r {{ item }} -u {{ idrac_user }} -p {{ idrac_pass }} sslcertupload -t 1 -f {{ acme_certs_dir }}/{{ item }}.crt --nocertwarn
+  shell: idracadm7 -r {{ item }} -u {{ ipmi_user }} -p {{ ipmi_pass }} sslcertupload -t 1 -f {{ acme_certs_dir }}/{{ item }}.crt --nocertwarn
   ignore_errors: true
   loop: "{{ ipmi_hosts }}"
   when: idrac_ver == "7"
 
 - name: Restart idrac
-  shell: idracadm7 -r {{ item }} -u {{ idrac_user }} -p {{ idrac_pass }} racreset
+  shell: idracadm7 -r {{ item }} -u {{ ipmi_user }} -p {{ ipmi_pass }} racreset
   ignore_errors: true
   loop: "{{ ipmi_hosts }}"
   when: idrac_ver == "7"
