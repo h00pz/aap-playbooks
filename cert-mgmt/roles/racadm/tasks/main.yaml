@@ -5,7 +5,6 @@
     acme_csrs_dir: "{{ local_path }}/csrs"
     acme_certs_dir: "{{ local_path }}/certs"
     acme_chain_dir: "{{ local_path }}/chain"
-  when: idrac_ver == "8" or idrac_ver == "9"
 
 - name: Importing certificate
   dellemc.openmanage.idrac_certificates:
