@@ -41,9 +41,15 @@
     - acme_chain
     - acme_challenge_host
 
-- name: when wildcard and subdomains present
+- name: when wildcard and subdomains present 1/2
   set_fact:
     rewritten_hostname: "{{ host_name | regex_replace('^\\*', 'wildcard') }}"
+  when: 
+    - starts_with_wildcard == true
+    - contains_sub_domains == true
+
+- name: when wildcard and subdomains present 2/2
+  set_fact:
     acme_private_key: "{{ acme_keys_dir }}/{{ rewritten_hostname }}.{{ domain_name }}.key"
     acme_csr: "{{ acme_csrs_dir }}/{{ rewritten_hostname }}.{{ domain_name }}.csr"
     acme_crt: "{{ acme_certs_dir }}/{{ rewritten_hostname }}.{{ domain_name }}.crt"
