@@ -3,12 +3,14 @@
   yum:
     name: {{ app1_rpm }}-{{ app1_version }}
     state: present
+  become: yes
 
 - name: Start and enable Apache
   systemd:
     name: {{ app1_process }}
     state: started
     enabled: yes
+  become: yes
 
 - name: Validate Apache installation
   ansible.builtin.uri: 
