@@ -12,7 +12,7 @@
     enabled: yes
   become: yes
 
-- name: Config {{app2_name }} - Set MySQL root password
+- name: Config MySQL root password
   mysql_user:
     login_user: "{{app2_user}}"
     login_password: "{{app2_pass}}"
