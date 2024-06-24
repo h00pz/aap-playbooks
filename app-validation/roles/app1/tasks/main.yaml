@@ -17,7 +17,7 @@
     url: http://localhost
     return_content: true
   register: app1_output
-  failed_when: app1_output.stdout.find('Apache') == -1
+  failed_when: app1_output.content.find('Apache') == -1
 
 - name: Debug Apache Validation  
   debug:
