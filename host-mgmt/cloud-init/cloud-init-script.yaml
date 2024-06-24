@@ -1,0 +1,47 @@
+#cloud-config
+
+runcmd:
+  - subscription-manager register --activationkey=your-activation-key --org=your-org-id
+  - subscription-manager attach --auto
+  - yum -y update
+  - yum -y install ansible-core       # Optional: Install Ansible if needed
+
+# Install dependencies
+    apt-get update
+    apt-get install -y python3-pip
+    pip3 install ansible ansible-runner
+
+    # Variables
+    AAP_URL="https://your-ansible-automation-platform-url"
+    JOB_TEMPLATE_ID="your-job-template-id"
+    AUTH_TOKEN="your-authentication-token"
+
+    # Create a directory for ansible-runner
+    mkdir /tmp/ansible-runner
+
+    # Create the inventory file
+    echo "[all]" > /tmp/ansible-runner/inventory
+    echo "localhost ansible_connection=local" >> /tmp/ansible-runner/inventory
+
+    # Create the playbook
+    cat <<EOF > /tmp/ansible-runner/project/playbook.yml
+    - name: Run Ansible Automation Platform Job Template
+      hosts: all
+      tasks:
+        - name: Trigger Job Template
+          uri:
+            url: "{{ aap_url }}/api/v2/job_templates/{{ job_template_id }}/launch/"
+            method: POST
+            headers:
+              Authorization: "Bearer {{ auth_token }}"
+              Content-Type: "application/json"
+            status_code: 201
+            body_format: json
+          vars:
+            aap_url: ${AAP_URL}
+            job_template_id: ${JOB_TEMPLATE_ID}
+            auth_token: ${AUTH_TOKEN}
+    EOF
+
+    # Run the playbook
+    ansible-runner run /tmp/ansible-runner

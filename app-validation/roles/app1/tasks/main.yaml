@@ -1,0 +1,23 @@
+---   
+- name: Install {{ app1_name }}
+  yum:
+    name: {{ app1_rpm }}-{{ app1_version }}
+    state: present
+
+- name: Start and enable Apache
+  systemd:
+    name: {{ app1_process }}
+    state: started
+    enabled: yes
+
+- name: Validate Apache installation
+  ansible.builtin.uri: 
+    url: http://localhost
+    return_content: true
+    register: app1_output
+  failed_when: app1_output.stdout.find('Apache') == -1
+
+- name: Debug Apache Validation  
+  debug:
+    var: app1_output
+  when: enable_debug == "yes"

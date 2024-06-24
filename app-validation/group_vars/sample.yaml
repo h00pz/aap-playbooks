@@ -1,0 +1,12 @@
+---
+#enable debugging:
+enable_debug: "yes"
+
+#set local username if necessary
+ansible_user: "redhat"
+
+#application1 variables
+app1_name: Apache
+app1_rpm: httpd
+app1_process: httpd
+app1_version: 2.4.57-8.el9
