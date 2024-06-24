@@ -1,13 +1,13 @@
 ---   
 - name: Install {{ app1_name }}
   yum:
-    name: {{ app1_rpm }}-{{ app1_version }}
+    name: "{{ app1_rpm }}-{{ app1_version }}"
     state: present
   become: yes
 
 - name: Start and enable Apache
   systemd:
-    name: {{ app1_process }}
+    name: "{{ app1_process }}"
     state: started
     enabled: yes
   become: yes
