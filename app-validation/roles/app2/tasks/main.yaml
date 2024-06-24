@@ -12,7 +12,7 @@
     enabled: yes
   become: yes
 
-- name: {{app2_name }} Config - Set MySQL root password
+- name: Config {{app2_name }} - Set MySQL root password
   mysql_user:
     login_user: "{{app2_user}}"
     login_password: "{{app2_pass}}"
@@ -20,7 +20,7 @@
     password: "{{ app2_pass }}"
   ignore_errors: yes
 
-- name: Validate MySQL installation
+- name: Validate {{ app2_name }} installation
   mysql_db:
     name: test_db
     state: present
@@ -28,7 +28,7 @@
     login_password: "{{ app2_pass }}"
   register: app2_output
 
-- name: Debug Apache Validation  
+- name: Debug {{ app2_name }} Validation  
   debug:
     var: app2_output
   when: enable_debug == "yes"
