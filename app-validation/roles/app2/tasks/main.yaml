@@ -13,7 +13,7 @@
   become: yes
 
 - name: Config MySQL root password
-  mysql_user:
+  community.mysql.mysql_user:
     login_user: "{{app2_user}}"
     login_password: "{{app2_pass}}"
     user: "{{app2_user}}"
