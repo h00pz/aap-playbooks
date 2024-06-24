@@ -4,3 +4,4 @@
     - all
   roles:
     - app1
+    - app2
