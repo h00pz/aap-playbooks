@@ -1,0 +1,21 @@
+---
+name: Docker Image CI mysql-py39-mysqlclient203
+
+on:
+  push:
+    paths:
+      - 'test-containers/mysql-py39-mysqlclient203/**'
+      - '.github/workflows/docker-image-mysql-py39-mysqlclient203.yml'
+      - '.github/workflows/build-docker-image.yml'
+    branches-ignore:
+      - stable-*
+
+jobs:
+
+  call-workflow-passing-data:
+    uses: ./.github/workflows/build-docker-image.yml
+    secrets: inherit
+    with:
+      registry: ghcr.io
+      image_name: test-container-mysql-py39-mysqlclient203
+      context: test-containers/mysql-py39-mysqlclient203

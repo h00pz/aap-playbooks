@@ -1,0 +1,21 @@
+---
+name: Docker Image CI mysql-py310-mysqlclient211
+
+on:
+  push:
+    paths:
+      - 'test-containers/mysql-py310-mysqlclient211/**'
+      - '.github/workflows/docker-image-mysql-py310-mysqlclient211.yml'
+      - '.github/workflows/build-docker-image.yml'
+    branches-ignore:
+      - stable-*
+
+jobs:
+
+  call-workflow-passing-data:
+    uses: ./.github/workflows/build-docker-image.yml
+    secrets: inherit
+    with:
+      registry: ghcr.io
+      image_name: test-container-mysql-py310-mysqlclient211
+      context: test-containers/mysql-py310-mysqlclient211

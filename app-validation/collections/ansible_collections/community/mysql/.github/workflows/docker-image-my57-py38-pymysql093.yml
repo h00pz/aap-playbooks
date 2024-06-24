@@ -1,0 +1,21 @@
+---
+name: Docker Image CI my57-py38-pymysql093
+
+on:
+  push:
+    paths:
+      - 'test-containers/my57-py38-pymysql093/**'
+      - '.github/workflows/docker-image-my57-py38-pymysql093.yml'
+      - '.github/workflows/build-docker-image.yml'
+    branches-ignore:
+      - stable-*
+
+jobs:
+
+  call-workflow-passing-data:
+    uses: ./.github/workflows/build-docker-image.yml
+    secrets: inherit
+    with:
+      registry: ghcr.io
+      image_name: test-container-my57-py38-pymysql093
+      context: test-containers/my57-py38-pymysql093

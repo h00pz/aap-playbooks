@@ -1,0 +1,18 @@
+---
+####################################################################
+# WARNING: These are designed specifically for Ansible tests       #
+# and should not be used as examples of how to write Ansible roles #
+####################################################################
+
+- name: Prepare the fake root folder
+  ansible.builtin.import_tasks:
+    file: fake_root.yml
+
+# setvars.yml requires the iproute2 package installed by install.yml
+- name: Set variables
+  ansible.builtin.import_tasks:
+    file: setvars.yml
+
+- name: Verify all components version under test
+  ansible.builtin.import_tasks:
+    file: verify.yml

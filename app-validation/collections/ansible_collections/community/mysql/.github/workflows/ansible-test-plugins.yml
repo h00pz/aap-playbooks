@@ -1,0 +1,369 @@
+---
+name: Plugins CI
+on:
+  push:
+    paths:
+      - 'plugins/**'
+      - 'tests/**'
+      - '.github/workflows/ansible-test-plugins.yml'
+  pull_request:
+    paths:
+      - 'plugins/**'
+      - 'tests/**'
+      - '.github/workflows/ansible-test-plugins.yml'
+  schedule:
+    - cron: '0 6 * * *'
+
+
+jobs:
+  sanity:
+    name: "Sanity (Ansible: ${{ matrix.ansible }})"
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        ansible:
+          - stable-2.14
+          - stable-2.15
+          - stable-2.16
+          - devel
+    steps:
+      - name: Perform sanity testing
+        uses: ansible-community/ansible-test-gh-action@release/v1
+        with:
+          ansible-core-version: ${{ matrix.ansible }}
+          testing-type: sanity
+          pull-request-change-detection: true
+
+  integration:
+    name: "Integration (Python: ${{ matrix.python }}, Ansible: ${{ matrix.ansible }}, DB: ${{ matrix.db_engine_name }} ${{ matrix.db_engine_version }}, connector: ${{ matrix.connector_name }} ${{ matrix.connector_version }})"
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: false
+      matrix:
+        ansible:
+          - stable-2.14
+          - stable-2.15
+          - stable-2.16
+          - devel
+        db_engine_name:
+          - mysql
+          - mariadb
+        db_engine_version:
+          - 5.7.40
+          - 8.0.31
+          - 10.4.27
+          - 10.5.18
+          - 10.6.11
+        python:
+          - '3.8'
+          - '3.9'
+          - '3.10'
+        connector_name:
+          - pymysql
+          - mysqlclient
+        connector_version:
+          - 0.7.11
+          - 0.9.3
+          - 1.0.2
+          - 2.0.1
+          - 2.0.3
+          - 2.1.1
+        exclude:
+          - db_engine_name: mysql
+            db_engine_version: 10.4.27
+
+          - db_engine_name: mysql
+            db_engine_version: 10.5.18
+
+          - db_engine_name: mysql
+            db_engine_version: 10.6.11
+
+          - db_engine_name: mariadb
+            db_engine_version: 5.7.40
+
+          - db_engine_name: mariadb
+            db_engine_version: 8.0.31
+
+          - connector_name: pymysql
+            connector_version: 2.0.1
+
+          - connector_name: pymysql
+            connector_version: 2.0.3
+
+          - connector_name: pymysql
+            connector_version: 2.1.1
+
+          - connector_name: mysqlclient
+            connector_version: 0.7.11
+
+          - connector_name: mysqlclient
+            connector_version: 0.9.3
+
+          - connector_name: mysqlclient
+            connector_version: 1.0.2
+
+          - db_engine_name: mariadb
+            connector_version: 0.7.11
+
+          - db_engine_version: 5.7.40
+            python: '3.9'
+
+          - db_engine_version: 5.7.40
+            python: '3.10'
+
+          - db_engine_version: 5.7.40
+            ansible: stable-2.14
+
+          - db_engine_version: 5.7.40
+            ansible: stable-2.15
+
+          - db_engine_version: 5.7.40
+            ansible: stable-2.16
+
+          - db_engine_version: 5.7.40
+            ansible: devel
+
+          - db_engine_version: 8.0.31
+            python: '3.8'
+
+          - db_engine_version: 8.0.31
+            python: '3.8'
+
+          - db_engine_version: 10.4.27
+            python: '3.10'
+
+          - db_engine_version: 10.4.27
+            ansible: devel
+
+          - db_engine_version: 10.6.11
+            python: '3.8'
+
+          - db_engine_version: 10.6.11
+            python: '3.9'
+
+          - python: '3.8'
+            connector_version: 1.0.2
+
+          - python: '3.8'
+            connector_version: 2.0.3
+
+          - python: '3.8'
+            connector_version: 2.1.1
+
+          - python: '3.9'
+            connector_version: 0.7.11
+
+          - python: '3.9'
+            connector_version: 1.0.2
+
+          - python: '3.9'
+            connector_version: 2.0.1
+
+          - python: '3.9'
+            connector_version: 2.1.1
+
+          - python: '3.10'
+            connector_version: 0.7.11
+
+          - python: '3.10'
+            connector_version: 0.9.3
+
+          - python: '3.10'
+            connector_version: 2.0.1
+
+          - python: '3.10'
+            connector_version: 2.0.3
+
+          - python: '3.8'
+            ansible: stable-2.14
+
+          - python: '3.8'
+            ansible: stable-2.15
+
+          - python: '3.8'
+            ansible: stable-2.16
+
+          - python: '3.8'
+            ansible: devel
+
+          - python: '3.9'
+            ansible: stable-2.15
+
+          - python: '3.9'
+            ansible: stable-2.16
+
+          - python: '3.9'
+            ansible: devel
+
+    services:
+      db_primary:
+        image: docker.io/library/${{ matrix.db_engine_name }}:${{ matrix.db_engine_version }}
+        env:
+          MARIADB_ROOT_PASSWORD: msandbox
+          MYSQL_ROOT_PASSWORD: msandbox
+        ports:
+          - 3307:3306
+        # We write our own health-cmd because the mariadb container does not
+        # provide a healthcheck
+        options: >-
+          --health-cmd "mysqladmin ping -P 3306 -pmsandbox |grep alive || exit 1"
+          --health-start-period 10s
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 6
+
+      db_replica1:
+        image: docker.io/library/${{ matrix.db_engine_name }}:${{ matrix.db_engine_version }}
+        env:
+          MARIADB_ROOT_PASSWORD: msandbox
+          MYSQL_ROOT_PASSWORD: msandbox
+        ports:
+          - 3308:3306
+        options: >-
+          --health-cmd "mysqladmin ping -P 3306 -pmsandbox |grep alive || exit 1"
+          --health-start-period 10s
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 6
+
+      db_replica2:
+        image: docker.io/library/${{ matrix.db_engine_name }}:${{ matrix.db_engine_version }}
+        env:
+          MARIADB_ROOT_PASSWORD: msandbox
+          MYSQL_ROOT_PASSWORD: msandbox
+        ports:
+          - 3309:3306
+        options: >-
+          --health-cmd "mysqladmin ping -P 3306 -pmsandbox |grep alive || exit 1"
+          --health-start-period 10s
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 6
+
+    steps:
+
+      # No need to check for service health. GitHub Action took care of it.
+
+      - name: Restart MySQL server with settings for replication
+        run: |
+          docker exec ${{ job.services.db_primary.id }} bash -c 'echo -e [mysqld]\\nserver-id=1\\nlog-bin=/var/lib/mysql/primary-bin > /etc/mysql/conf.d/replication.cnf'
+          docker exec ${{ job.services.db_replica1.id }} bash -c 'echo -e [mysqld]\\nserver-id=2\\nlog-bin=/var/lib/mysql/replica1-bin > /etc/mysql/conf.d/replication.cnf'
+          docker exec ${{ job.services.db_replica2.id }} bash -c 'echo -e [mysqld]\\nserver-id=3\\nlog-bin=/var/lib/mysql/replica2-bin > /etc/mysql/conf.d/replication.cnf'
+          docker restart -t 30 ${{ job.services.db_primary.id }}
+          docker restart -t 30 ${{ job.services.db_replica1.id }}
+          docker restart -t 30 ${{ job.services.db_replica2.id }}
+
+      - name: Wait for the primary to be healthy
+        run: >
+          while ! /usr/bin/docker inspect
+          --format="{{if .Config.Healthcheck}}{{print .State.Health.Status}}{{end}}"
+          ${{ job.services.db_primary.id }}
+          | grep healthy && [[ "$SECONDS" -lt 120 ]]; do sleep 1; done
+
+      - name: Compute docker_image - Set python_version_flat
+        run: >
+          echo "python_version_flat=$(echo ${{ matrix.python }}
+          | tr -d '.')" >> $GITHUB_ENV
+
+      - name: Compute docker_image - Set connector_version_flat
+        run: >
+          echo "connector_version_flat=$(echo ${{ matrix.connector_version }}
+          |tr -d .)" >> $GITHUB_ENV
+
+      - name: Compute docker_image - Set db_engine_version_flat
+        run: >
+          echo "db_engine_version_flat=$(echo ${{ matrix.db_engine_version }}
+          | awk -F '.' '{print $1 $2}')" >> $GITHUB_ENV
+
+      - name: Compute docker_image - Set db_client
+        run: >
+          if [[ ${{ env.db_engine_version_flat }} == 57 ]]; then
+            echo "db_client=my57" >> $GITHUB_ENV;
+          else
+            echo "db_client=$(echo ${{ matrix.db_engine_name }})" >> $GITHUB_ENV;
+          fi
+
+      - name: Set docker_image
+        run: >
+          docker_image_multiline=("
+          ghcr.io/ansible-collections/community.mysql\
+          /test-container-${{ env.db_client }}\
+          -py${{ env.python_version_flat }}\
+          -${{ matrix.connector_name }}${{ env.connector_version_flat }}\
+          :latest")
+
+          echo "docker_image=$(printf '%s' $docker_image_multiline)"
+          >> $GITHUB_ENV
+
+      - name: >-
+          Perform integration testing against
+          Ansible version ${{ matrix.ansible }}
+          under Python ${{ matrix.python }}
+        uses: ansible-community/ansible-test-gh-action@release/v1
+        with:
+          ansible-core-version: ${{ matrix.ansible }}
+          pre-test-cmd: >-
+            echo Setting db_engine_name to "${{ matrix.db_engine_name }}"...;
+            echo -n "${{ matrix.db_engine_name }}"
+            > tests/integration/db_engine_name;
+
+            echo Setting db_engine_version to \
+            "${{ matrix.db_engine_version }}"...;
+            echo -n "${{ matrix.db_engine_version }}"
+            > tests/integration/db_engine_version;
+
+            echo Setting Connector name to "${{ matrix.connector_name }}"...;
+            echo -n "${{ matrix.connector_name }}"
+            > tests/integration/connector_name;
+
+            echo Setting Connector name to "${{ matrix.connector_version }}"...;
+            echo -n "${{ matrix.connector_version }}"
+            > tests/integration/connector_version;
+
+            echo Setting Python version to "${{ matrix.python }}"...;
+            echo -n "${{ matrix.python }}"
+            > tests/integration/python;
+
+            echo Setting Ansible version to "${{ matrix.ansible }}"...;
+            echo -n "${{ matrix.ansible }}"
+            > tests/integration/ansible
+          docker-image: ${{ env.docker_image }}
+          target-python-version: ${{ matrix.python }}
+          testing-type: integration
+
+  units:
+    runs-on: ubuntu-20.04
+    name: Units (Ⓐ${{ matrix.ansible }})
+    strategy:
+      # As soon as the first unit test fails,
+      # cancel the others to free up the CI queue
+      fail-fast: true
+      matrix:
+        ansible:
+          - stable-2.14
+          - stable-2.15
+          - stable-2.16
+          - devel
+        python:
+          - 3.8
+          - 3.9
+        exclude:
+          - python: '3.8'
+            ansible: stable-2.14
+          - python: '3.8'
+            ansible: stable-2.15
+          - python: '3.8'
+            ansible: stable-2.16
+          - python: '3.8'
+            ansible: devel
+
+    steps:
+      - name: >-
+          Perform unit testing against
+          Ansible version ${{ matrix.ansible }}
+        uses: ansible-community/ansible-test-gh-action@release/v1
+        with:
+          ansible-core-version: ${{ matrix.ansible }}
+          target-python-version: ${{ matrix.python }}
+          testing-type: units
+          pull-request-change-detection: true

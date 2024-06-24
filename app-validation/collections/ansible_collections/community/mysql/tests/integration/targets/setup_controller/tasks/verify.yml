@@ -1,0 +1,63 @@
+---
+
+- vars:
+    mysql_parameters: &mysql_params
+      login_user: root
+      login_password: msandbox
+      login_host: "{{ gateway_addr }}"
+      login_port: 3307
+
+  block:
+
+    - name: Query Primary container over TCP for MySQL/MariaDB version
+      mysql_info:
+        <<: *mysql_params
+        filter:
+          - version
+      register: primary_info
+
+    - name: Assert that test container runs the expected MySQL/MariaDB version
+      assert:
+        that:
+          - registred_db_version == db_version
+      vars:
+        registred_db_version:
+          "{{ primary_info.version.major }}.{{ primary_info.version.minor }}\
+          .{{ primary_info.version.release }}"
+
+    - name: Assert that mysql_info module used the expected version of pymysql
+      assert:
+        that:
+          - primary_info.connector_name == connector_name
+          - primary_info.connector_version == connector_version
+      when:
+        - connector_name == 'pymysql'
+
+    - name: Assert that mysql_info module used the expected version of mysqlclient
+      assert:
+        that:
+          - primary_info.connector_name == 'MySQLdb'
+          - primary_info.connector_version == connector_version
+      when:
+        - connector_name == 'mysqlclient'
+
+    - name: Display the python version in use
+      command:
+        cmd: python{{ python_version }} -V
+      changed_when: false
+      register: python_in_use
+
+    - name: Assert that expected Python is installed
+      assert:
+        that:
+          - python_in_use.stdout is search(python_version)
+
+    - name: Assert that we run the expected ansible version
+      assert:
+        that:
+          - ansible_running_version == test_ansible_version
+      vars:
+        ansible_running_version:
+          "{{ ansible_version.major }}.{{ ansible_version.minor }}"
+      when:
+        - test_ansible_version != 'devel'  # Devel will change overtime
