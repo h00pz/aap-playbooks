@@ -1,0 +1,34 @@
+---   
+- name: Install {{ app2_name }}
+  yum:
+    name: "{{ app2_rpm }}-{{ app2_version }}"
+    state: present
+  become: yes
+
+- name: Start and enable {{ app2_name }}
+  systemd:
+    name: "{{ app2_process }}"
+    state: started
+    enabled: yes
+  become: yes
+
+- name: {{app2_name }} Config - Set MySQL root password
+  mysql_user:
+    login_user: "{{app2_user}}"
+    login_password: "{{app2_pass}}"
+    user: "{{app2_user}}"
+    password: "{{ app2_pass }}"
+  ignore_errors: yes
+
+- name: Validate MySQL installation
+  mysql_db:
+    name: test_db
+    state: present
+    login_user: "{{app2_user}}"
+    login_password: "{{ app2_pass }}"
+  register: app2_output
+
+- name: Debug Apache Validation  
+  debug:
+    var: app2_output
+  when: enable_debug == "yes"

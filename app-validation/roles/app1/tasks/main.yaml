@@ -5,7 +5,7 @@
     state: present
   become: yes
 
-- name: Start and enable Apache
+- name: Start and enable {{ app1_name }}
   systemd:
     name: "{{ app1_process }}"
     state: started

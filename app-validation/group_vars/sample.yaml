@@ -10,3 +10,10 @@ app1_name: Apache
 app1_rpm: httpd
 app1_process: httpd
 app1_version: 2.4.57-8.el9
+
+app2_name: MySQL
+app2_rpm: mariadb-server
+app2_process: mariadb
+app2_verson: 3:10.5.22-1.el9_2
+apps_user: root
+apps_pass: RedHat123!
